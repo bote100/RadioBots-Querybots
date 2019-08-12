@@ -29,12 +29,17 @@ public class RefreshContext extends RestAPIContext {
 
     @Override
     public void handle(HttpExchange httpExchange) {
-
         if(!checkParams(httpExchange)) return;
 
         String stringID = getHeaderVal(httpExchange, "id");
 
         try {
+
+            if(!checkAccess(httpExchange, Integer.parseInt(stringID))) {
+                sendResponse(new JSONObject().put("success", false).put("data", "This is not your bot!").toString(), httpExchange);
+                return;
+            }
+
             if(!QBManager.isInitalized(Integer.parseInt(stringID))) {
                 sendResponse(new JSONObject().put("success", false).put("data", "Bot isn't online!").toString(), httpExchange);
                 return;

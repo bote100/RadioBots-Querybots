@@ -1,9 +1,9 @@
 package net.bote.radiobots.querybots.restapi.contexts.comp;
 
+import com.google.common.collect.Lists;
 import com.sun.net.httpserver.HttpExchange;
 import net.bote.radiobots.querybots.restapi.contexts.RestAPIContext;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,15 +20,14 @@ public class DevContext extends RestAPIContext {
 
     @Override
     public List<String> getRequiredKeys() {
-        return Collections.emptyList();
+        return Lists.newArrayList();
     }
 
     @Override
     public void handle(HttpExchange httpExchange) {
 
-        StringBuilder builder = new StringBuilder();
+        if(!checkParams(httpExchange)) return;
 
-        httpExchange.getRequestHeaders().forEach((s, list) -> builder.append(" | s = "+s+": "+list.toString()+" | ; \n"));
-        sendResponse(builder.toString(), httpExchange);
+        sendResponse( checkAccess(httpExchange, 1) + "", httpExchange);
     }
 }

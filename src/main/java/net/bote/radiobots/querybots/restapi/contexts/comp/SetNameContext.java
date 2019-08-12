@@ -35,6 +35,12 @@ public class SetNameContext extends RestAPIContext {
         String stringID = getHeaderVal(httpExchange, "id");
         String newName = getHeaderVal(httpExchange, "name");
         try {
+
+            if(!checkAccess(httpExchange, Integer.parseInt(stringID))) {
+                sendResponse(new JSONObject().put("success", false).put("data", "This is not your bot!").toString(), httpExchange);
+                return;
+            }
+
             if(!QBManager.isInitalized(Integer.parseInt(stringID))) {
                 sendResponse(new JSONObject().put("success", false).put("data", "Bot isn't online!").toString(), httpExchange);
                 return;

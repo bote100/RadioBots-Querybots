@@ -3,11 +3,13 @@ package net.bote.radiobots.querybots.restapi.contexts;
 import com.google.common.collect.Maps;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import net.bote.radiobots.querybots.QueryBotApplication;
 import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -29,6 +31,15 @@ public abstract class RestAPIContext implements HttpHandler {
     public abstract List<String> getRequiredKeys();
 
     public boolean checkParams(HttpExchange exchange) {
+
+        if(!isHeaderSet("apikey", exchange)) {
+            sendResponse(new JSONObject()
+                            .put("success", false)
+                            .put("data", "Missing API key!").toString()
+                    , exchange);
+            return false;
+        }
+
         for (String current : getRequiredKeys()) {
             if (!isHeaderSet(current, exchange)) {
                 sendResponse(new JSONObject()
@@ -64,12 +75,22 @@ public abstract class RestAPIContext implements HttpHandler {
         return getParams(exchange).get(key);
     }
 
+    public boolean checkAccess(HttpExchange exchange, int botid) {
+        try {
+            return QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeQuery(
+                    "SELECT uuid FROM query_bot_entity WHERE apikey='"+getParams(exchange).getOrDefault("apikey", "")+"'" +
+                            "AND uuid='" + botid + "'"
+            ).next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public HashMap<String, String> getParams(HttpExchange httpExchange) {
         if(savedParams.containsKey(httpExchange)) return savedParams.get(httpExchange);
         HashMap<String, String> map = Maps.newHashMap();
-        httpExchange.getRequestHeaders().forEach((s, list) -> {
-            map.put(s.toLowerCase(), list.get(0));
-        });
+        httpExchange.getRequestHeaders().forEach((s, list) -> map.put(s.toLowerCase(), list.get(0)));
         savedParams.put(httpExchange, map);
         return map;
     }

@@ -33,8 +33,13 @@ public class StartContext extends RestAPIContext {
 
         String stringID = getHeaderVal(httpExchange, "id");
 
-        QueryBot queryBot;
+        QueryBot queryBot = null;
         try {
+            if(!checkAccess(httpExchange, Integer.parseInt(stringID))) {
+                sendResponse(new JSONObject().put("success", false).put("data", "This is not your bot!").toString(), httpExchange);
+                return;
+            }
+
             if(QBManager.isInitalized(Integer.parseInt(stringID))) {
                 sendResponse(new JSONObject().put("success", false).put("data", "Bot is already started!").toString(), httpExchange);
                 return;

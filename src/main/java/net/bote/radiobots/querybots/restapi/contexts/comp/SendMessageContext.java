@@ -30,16 +30,27 @@ public class SendMessageContext extends RestAPIContext {
     @Override
     public void handle(HttpExchange httpExchange) {
 
-        if(!checkParams(httpExchange)) return;
+        if (!checkParams(httpExchange)) return;
 
         String stringID = getHeaderVal(httpExchange, "id");
 
         QueryBot queryBot;
         try {
-            if(!QBManager.isInitalized(Integer.parseInt(stringID))) {
+
+            if (!checkAccess(httpExchange, Integer.parseInt(stringID))) {
+                sendResponse(new JSONObject().put("success", false).put("data", "This is not your bot!").toString(), httpExchange);
+                return;
+            }
+
+            if (!QBManager.isInitalized(Integer.parseInt(stringID))) {
                 sendResponse(new JSONObject().put("success", false).put("data", "Bot isn't online!").toString(), httpExchange);
                 return;
             }
+
+            // Just for NumberFormat check
+            Integer.parseInt(getHeaderVal(httpExchange, "user"));
+
+
             executor.execute(() -> {
                 try {
                     QBManager.getQueryBot(Integer.parseInt(stringID)).
