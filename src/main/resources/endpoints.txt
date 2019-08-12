@@ -1,0 +1,26 @@
+Alle Calls unter IP:PORT/ENDPOINT
+
+Die Parameter werden über Headers übergeben. Für jede Variable eine Header (war einfacher zu managen :) )
+
+ALLE Endpoints benötigen den Parameter "apikey"
+Den speicherst jedoch du in deinen Account-Datenbanken, nicht ich in denen der Querybots
+
+Endpoints:
+
+    create:
+        Parameter: name, querypw, queryuser, server, nickname
+
+    refresh:
+        Paremter: id
+
+    setname:
+        Parameter: name, id
+
+    start:
+        Paremeter: id
+
+    status:
+        Parameter: id
+
+    stop:
+        parameter: id
