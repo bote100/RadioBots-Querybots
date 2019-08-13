@@ -90,7 +90,11 @@ public abstract class RestAPIContext implements HttpHandler {
     public HashMap<String, String> getParams(HttpExchange httpExchange) {
         if(savedParams.containsKey(httpExchange)) return savedParams.get(httpExchange);
         HashMap<String, String> map = Maps.newHashMap();
-        httpExchange.getRequestHeaders().forEach((s, list) -> map.put(s.toLowerCase(), list.get(0)));
+
+        JSONObject jsonObject = new JSONObject(httpExchange.getRequestHeaders().get("data").get(0));
+        jsonObject.keys().forEachRemaining(s -> map.put(s, String.valueOf(jsonObject.get(s))));
+
+        //httpExchange.getRequestHeaders().forEach((s, list) -> map.put(s.toLowerCase(), list.get(0)));
         savedParams.put(httpExchange, map);
         return map;
     }
