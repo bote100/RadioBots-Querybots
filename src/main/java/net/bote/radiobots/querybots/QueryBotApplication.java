@@ -32,6 +32,7 @@ public class QueryBotApplication {
         instance = this;
         createConfig();
         this.webServerService = new WebServerService(config.getInt("restApiPort"));
+
         try {
             this.mysqlConnection = DriverManager.getConnection(
                     "jdbc:mysql://" + config.getString("mysqlHost") + ":3306/" + config.getString("mysqlDatabase") +
@@ -54,15 +55,17 @@ public class QueryBotApplication {
     }
 
     private void createConfig() {
-        Document document = new Document()
-                .append("restApiPort", 48)
-                .append("mysqlHost", "localhost")
-                .append("mysqlUser", "root")
-                .append("mysqlDatabase", "querybots")
-                .append("mysqlPassword", "");
-
         File file = new File("config.json");
-        if(!file.exists()) document.saveAsConfig(file);
+        if(!file.exists()) {
+            Document document = new Document()
+                    .append("restApiPort", 48)
+                    .append("mysqlHost", "localhost")
+                    .append("mysqlUser", "root")
+                    .append("mysqlDatabase", "querybots")
+                    .append("mysqlPassword", "");
+            document.saveAsConfig(file);
+            this.config = document;
+        }
         this.config = new Document().loadToExistingDocument(file);
     }
 
