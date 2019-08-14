@@ -50,6 +50,7 @@ public class StatusContext extends RestAPIContext {
             sendResponse(new JSONObject()
                     .put("success", true)
                     .put("host", queryBot.getDocument().getString("host"))
+                    .put("location", queryBot.getLocation())
                     .put("name", queryBot.getNickname())
                     .put("onlineClients", queryBot.getTs3Api().getClients().size())
                     .put("activeModules", queryBot.getDocument().getString("modules"))

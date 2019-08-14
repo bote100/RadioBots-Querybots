@@ -34,7 +34,7 @@ public class QBManager {
                 .append("name", resultSet.getString("nickname"))
                 .append("modules", resultSet.getString("modules"));
 
-        QueryBot queryBot = new QueryBot(uid, doc);
+        QueryBot queryBot = new QueryBot(uid, doc, QueryBotApplication.getInstance().getConfig().getString("locationNick"));
         onlineBots.put(uid, queryBot);
         return queryBot;
     }

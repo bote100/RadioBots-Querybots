@@ -59,6 +59,7 @@ public class QueryBotApplication {
         if(!file.exists()) {
             Document document = new Document()
                     .append("restApiPort", 48)
+                    .append("locationNick", "DE_FFM")
                     .append("mysqlHost", "localhost")
                     .append("mysqlUser", "root")
                     .append("mysqlDatabase", "querybots")

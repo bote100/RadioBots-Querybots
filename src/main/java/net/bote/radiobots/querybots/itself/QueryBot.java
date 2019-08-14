@@ -34,15 +34,17 @@ public class QueryBot {
     private final TS3Api ts3Api;
     private final TS3Query ts3Query;
     private final Document document;
+    private final String location;
 
     @Setter
     private String nickname;
 
     private final List<Module> moduleList;
 
-    public QueryBot(int uid, Document document) {
+    public QueryBot(int uid, Document document, String location) {
         this.uuid = uid;
         this.document = document;
+        this.location = location;
         this.moduleList = ModuleService.getModules(this);
 
         this.ts3Config = new TS3Config();
