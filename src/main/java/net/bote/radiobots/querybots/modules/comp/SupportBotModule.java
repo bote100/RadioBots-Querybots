@@ -1,6 +1,7 @@
 package net.bote.radiobots.querybots.modules.comp;
 
 import com.github.theholywaffle.teamspeak3.api.event.ClientMovedEvent;
+import com.github.theholywaffle.teamspeak3.api.wrapper.Channel;
 import net.bote.radiobots.querybots.QueryBotApplication;
 import net.bote.radiobots.querybots.itself.QueryBot;
 import net.bote.radiobots.querybots.modules.Module;
@@ -21,11 +22,12 @@ public class SupportBotModule extends Module {
 
     public SupportBotModule(QueryBot queryBot) {
         super(queryBot);
+        for (Channel channel : getQueryBot().getTs3Api().getChannels()) channelMap.put(channel.getId(), channel);
     }
 
     private Map<String, String> vals;
 
-    private String supportChannel;
+    Map<Integer, Channel> channelMap;
 
     @Override
     public String getName() {
@@ -40,14 +42,17 @@ public class SupportBotModule extends Module {
     @Override
     public void resetVariables() {
         vals = null;
-        supportChannel = null;
+        channelMap.clear();
     }
 
     @Override
     public void onClientSwitchChannel(ClientMovedEvent event) {
         Map<String, String> infos = getSupportInfos();
-        System.out.println("DEBUG");
-        if (getQueryBot().getTs3Api().getChannelByNameExact(supportChannel, false).getId() == event.getTargetChannelId()) {
+
+        if(channelMap.size() != getQueryBot().getTs3Api().getChannels().size())
+            for (Channel channel : getQueryBot().getTs3Api().getChannels()) channelMap.put(channel.getId(), channel);
+
+        if (channelMap.get(event.getTargetChannelId()).getTopic().equalsIgnoreCase("SUPPORT_WAITING")) {
             getQueryBot().getTs3Api().getClients().stream()
                     .filter(client -> client.isInServerGroup(Integer.parseInt(infos.get("group"))))
                     .forEach(client -> getQueryBot().getTs3Api().pokeClient(client.getId(), infos.get("message")));
@@ -61,15 +66,11 @@ public class SupportBotModule extends Module {
         try {
 
             ResultSet resultSet = QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeQuery(
-                    "SELECT channel, message, tsgroup FROM support_bot_entity WHERE id='" + getQueryBot().getUuid() + "'"
+                    "SELECT message, tsgroup FROM support_bot_entity WHERE id='" + getQueryBot().getUuid() + "'"
             );
             resultSet.next();
 
-            if (Objects.isNull(supportChannel) || !supportChannel.equals(resultSet.getString("channel")))
-                supportChannel = resultSet.getString("channel");
-
             vals = MapBuilder.buildStringMap(
-                    new MapPair("channel", resultSet.getString("channel")),
                     new MapPair("message", resultSet.getString("message")),
                     new MapPair("group", String.valueOf(resultSet.getInt("tsgroup")))
             );

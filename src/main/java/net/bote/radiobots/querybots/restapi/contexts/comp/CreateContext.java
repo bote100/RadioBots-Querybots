@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ public class CreateContext extends RestAPIContext {
 
     @Override
     public List<String> getRequiredKeys() {
-        return Arrays.asList("name", "querypw", "queryuser", "server", "nickname");
+        return Arrays.asList("querypw", "queryuser", "server", "nickname");
     }
 
     @Override
@@ -37,7 +38,8 @@ public class CreateContext extends RestAPIContext {
         try {
             QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeUpdate(
                     "INSERT INTO query_bot_entity (apikey, modules, query_password, query_user, server, nickname) VALUES " +
-                            "('" + getHeaderVal(hex, "apikey") + "', '[\"welcome\"]', '" + getHeaderVal(hex, "querypw") + "'," +
+                            "('" + getHeaderVal(hex, "apikey") + "', '[\"welcome\"]', '" + Base64.getEncoder()
+                            .encodeToString(getHeaderVal(hex, "querypw").getBytes()) + "'," +
                             "'" + getHeaderVal(hex, "queryuser") + "', '" + getHeaderVal(hex, "server") + "', '" + getHeaderVal(hex, "nickname") + "')"
             );
 
@@ -46,8 +48,8 @@ public class CreateContext extends RestAPIContext {
 
             update("INSERT INTO afk_poke_entity (id, message) VALUES ('"+botid+"', 'Du wurdest in den AFK Channel, aufgrund zu langer Inaktivität, verschoben!')");
             update("INSERT INTO welcome_message_entity (id, message) VALUES ('"+botid+"', 'Willkommen auf diesem TeamSpeak!')");
-            update("INSERT INTO support_bot_entity (id, channel, message, tsgroup) " +
-                    "VALUES ('"+botid+"', 'Support-Channel', 'Ein Nutzer wartet im Support!', '1')");
+            update("INSERT INTO support_bot_entity (id, message, tsgroup) " +
+                    "VALUES ('"+botid+"', 'Ein Nutzer wartet im Support!', '1')");
 
         } catch (SQLException e) {
             e.printStackTrace();

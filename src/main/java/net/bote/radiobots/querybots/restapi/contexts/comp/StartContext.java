@@ -1,5 +1,6 @@
 package net.bote.radiobots.querybots.restapi.contexts.comp;
 
+import com.google.common.collect.Maps;
 import com.sun.net.httpserver.HttpExchange;
 import net.bote.radiobots.querybots.itself.QBManager;
 import net.bote.radiobots.querybots.itself.QueryBot;
@@ -7,6 +8,7 @@ import net.bote.radiobots.querybots.restapi.contexts.RestAPIContext;
 import org.json.JSONObject;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -15,6 +17,8 @@ import java.util.List;
  */
 
 public class StartContext extends RestAPIContext {
+
+    private HashMap<String, Integer> wrongLogins = Maps.newHashMap();
 
     @Override
     public String getURLDirectory() {
@@ -33,8 +37,14 @@ public class StartContext extends RestAPIContext {
 
         String stringID = getHeaderVal(httpExchange, "id");
 
-        QueryBot queryBot = null;
+        QueryBot queryBot;
         try {
+
+            if(wrongLogins.getOrDefault(getHeaderVal(httpExchange, "apikey"), 0) >= 3) {
+                sendResponse(new JSONObject().put("success", false).put("data", "You tried to login too often!").toString(), httpExchange);
+                return;
+            }
+
             if(!checkAccess(httpExchange, Integer.parseInt(stringID))) {
                 sendResponse(new JSONObject().put("success", false).put("data", "This is not your bot!").toString(), httpExchange);
                 return;
@@ -46,8 +56,20 @@ public class StartContext extends RestAPIContext {
             }
             queryBot = QBManager.getQueryBot(Integer.parseInt(stringID));
         } catch (Exception e) {
-            e.printStackTrace();
-            sendResponse(new JSONObject().put("success", false).put("data", e.getMessage()).toString(), httpExchange);
+            System.err.println(e.getMessage());
+
+            wrongLogins.put(getHeaderVal(httpExchange, "apikey"), wrongLogins.getOrDefault(getHeaderVal(httpExchange, "apikey"), 0) + 1);
+            new java.util.Timer().schedule(
+                    new java.util.TimerTask() {
+                        @Override
+                        public void run() {
+                            wrongLogins.put(getHeaderVal(httpExchange, "apikey"), wrongLogins.getOrDefault(getHeaderVal(httpExchange, "apikey"), 1) - 1);
+                        }
+                    },
+                    60000
+            );
+
+            sendResponse(new JSONObject().put("success", false).put("data", e.getMessage()).put("left", (3 - wrongLogins.get(getHeaderVal(httpExchange, "apikey")))).toString(), httpExchange);
             return;
         }
 

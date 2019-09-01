@@ -38,6 +38,7 @@ public class QueryBotApplication {
                     "jdbc:mysql://" + config.getString("mysqlHost") + ":3306/" + config.getString("mysqlDatabase") +
                             "?autoReconnect=true&serverTimezone=UTC", config.getString("mysqlUser"), config.getString("mysqlPassword")
             );
+            System.out.println("[DEBUG] The password has " + config.getString("mysqlPassword").toCharArray().length + " characters.");
         } catch (SQLException e) { e.printStackTrace(); }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
