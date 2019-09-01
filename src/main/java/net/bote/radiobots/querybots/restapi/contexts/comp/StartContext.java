@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Elias Arndt | bote100
@@ -56,7 +57,9 @@ public class StartContext extends RestAPIContext {
             }
             queryBot = QBManager.getQueryBot(Integer.parseInt(stringID));
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+
+            if(Objects.isNull(e.getMessage())) e.printStackTrace();
+            else System.err.println(e.getMessage());
 
             wrongLogins.put(getHeaderVal(httpExchange, "apikey"), wrongLogins.getOrDefault(getHeaderVal(httpExchange, "apikey"), 0) + 1);
             new java.util.Timer().schedule(
