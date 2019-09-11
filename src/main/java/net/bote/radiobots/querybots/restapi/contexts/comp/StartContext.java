@@ -73,6 +73,7 @@ public class StartContext extends RestAPIContext {
             );
 
             sendResponse(new JSONObject().put("success", false).put("data", e.getMessage()).put("left", (3 - wrongLogins.get(getHeaderVal(httpExchange, "apikey")))).toString(), httpExchange);
+            e.printStackTrace();
             return;
         }
 

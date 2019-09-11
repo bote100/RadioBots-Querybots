@@ -5,6 +5,8 @@ import com.github.theholywaffle.teamspeak3.TS3Config;
 import com.github.theholywaffle.teamspeak3.TS3Query;
 import com.github.theholywaffle.teamspeak3.api.event.*;
 import com.github.theholywaffle.teamspeak3.api.exception.TS3CommandFailedException;
+import com.github.theholywaffle.teamspeak3.api.wrapper.Channel;
+import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,11 +16,10 @@ import net.bote.radiobots.querybots.util.Document;
 import org.json.JSONArray;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 
 /**
  * @author Elias Arndt | bote100
@@ -40,6 +41,8 @@ public class QueryBot {
     private String nickname;
 
     private final List<Module> moduleList;
+
+    private final Map<Integer, Channel> channelMap = Maps.newHashMap();
 
     public QueryBot(int uid, Document document, String location) {
         this.uuid = uid;
@@ -65,7 +68,6 @@ public class QueryBot {
             ex.printStackTrace();
             this.nickname = "RadioBotsEU Querybot #" + ThreadLocalRandom.current().nextInt(999);
             setNickname(this.nickname);
-            return;
         }
 
         System.out.println("Querybot#" + uid + " ("+this.nickname+") <=> started <=> " + document.getString("host"));
@@ -86,6 +88,22 @@ public class QueryBot {
         System.out.println("Querybot#" + this.uuid + " ("+getNickname()+") <=> disconnecting <=> " + getDocument().getString("host"));
         getTs3Query().exit();
         QBManager.removeBot(getUuid());
+    }
+
+    public Map<Integer, Channel> getChannelMap() {
+        if(getTs3Api().getChannels().size() == channelMap.size()) return channelMap;
+
+        channelMap.clear();
+        for (Channel channel : getTs3Api().getChannels()) channelMap.put(channel.getId(), channel);
+        return channelMap;
+    }
+
+    public void ping(Consumer<Integer> callback) {
+        Executors.newCachedThreadPool().execute(() -> {
+            long start = System.currentTimeMillis();
+            getTs3Api().getServerInfo().getIp();
+            callback.accept((int)(System.currentTimeMillis() - start));
+        });
     }
 
     private List<Module> activeModules;

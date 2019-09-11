@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Elias Arndt | bote100
@@ -39,16 +41,21 @@ public class QueryBotApplication {
                             "?autoReconnect=true&serverTimezone=UTC", config.getString("mysqlUser"), config.getString("mysqlPassword")
             );
             System.out.println("[DEBUG] The password has " + config.getString("mysqlPassword").toCharArray().length + " characters.");
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutdown RadioBotsEU QueryBot system...");
             webServerService.getHttpServer().stop(0);
             System.out.println("Exit all active query bots");
             QBManager.getAllBots(QueryBot::stop);
-            try { mysqlConnection.close(); } catch (SQLException e) { e.printStackTrace(); }
+            try {
+                mysqlConnection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
             System.out.println("Have a good day!");
-            try { Thread.sleep(2000); } catch (InterruptedException e) { e.printStackTrace(); }
         }));
 
         System.out.println("Started successfully RadioBotsEU QueryBot System!");
@@ -57,7 +64,7 @@ public class QueryBotApplication {
 
     private void createConfig() {
         File file = new File("config.json");
-        if(!file.exists()) {
+        if (!file.exists()) {
             Document document = new Document()
                     .append("restApiPort", 48)
                     .append("locationNick", "DE_FFM")
@@ -76,14 +83,26 @@ public class QueryBotApplication {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             String line;
             while ((line = reader.readLine()) != null) {
-                if(line.length() == 0) return;
+                System.out.println("fjakdf");
+                if (line.length() == 0) return;
 
-                if(line.equalsIgnoreCase("stop")) {
+                if (line.equalsIgnoreCase("stop")) {
                     System.exit(0);
+                } else if (line.equalsIgnoreCase("stats")) {
+                    AtomicInteger allBots = new AtomicInteger(0);
+                    QBManager.getAllBots(queryBot -> allBots.addAndGet(1));
+                    System.out.println("Currently are " + allBots.get() + " QueryBots active.");
+
+                    if (QBManager.getOnlineBots().size() == 0) return;
+
+                    System.out.println("Ping random QueryBot...");
+                    QueryBot queryBot = QBManager.getOnlineBots().get(ThreadLocalRandom.current().nextInt(QBManager.getOnlineBots().size()));
+                    queryBot.ping(pingInt -> System.out.println("QueryBots #" + queryBot.getNickname() + " connected to " + queryBot.getDocument().getString("host") + " took " + pingInt + "ms."));
                 }
 
             }
-        } catch (Exception ex) {}
+        } catch (Exception ex) {
+        }
     }
 
 }

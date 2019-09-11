@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 
 public class AFKBotModule extends Module {
 
+    private long idletime = -991231231141241L;
+
     public AFKBotModule(QueryBot queryBot) {
         super(queryBot);
     }
@@ -40,20 +42,32 @@ public class AFKBotModule extends Module {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                if(!getQueryBot().getTs3Query().isConnected()) return;
+                if (!getQueryBot().getTs3Query().isConnected()) return;
                 getQueryBot().getTs3Api().getClients().stream()
-                        .filter(c -> c.getIdleTime() > TimeUnit.MINUTES.toMillis(5))
+                        .filter(c -> c.getIdleTime() > getIdleTime())
                         .forEach(c -> {
-                            if(getQueryBot().getTs3Api().getChannelsByName("AFK").size() > 0) {
-                                if(c.getChannelId() == getQueryBot().getTs3Api().getChannelsByName("AFK").get(0).getId()) return;
-                                getQueryBot().getTs3Api().moveClient(c.getId(), getQueryBot().getTs3Api().getChannelsByName("AFK").get(0).getId());
-                            }
-                            else {
-                                if(c.getChannelId()==defaultChannel.getId()) return;
-                                getQueryBot().getTs3Api().moveClient(c.getId(), defaultChannel.getId());
-                            }
 
-                            getQueryBot().getTs3Api().pokeClient(c.getId(), getPokeMessage());
+                            Channel afk = null;
+
+                            try {
+                                afk = getQueryBot().getTs3Api().getChannels().stream()
+                                        .filter(chan -> chan.getTopic().equals("AFK_CHANNEL"))
+                                        .findFirst().orElseGet(null);
+                            } catch (NullPointerException nex) { }
+
+                            if (Objects.isNull(afk)) {
+                                if (c.getChannelId() == defaultChannel.getId()) return;
+                                getQueryBot().getTs3Api().moveClient(c.getId(), defaultChannel.getId());
+                            } else {
+                                if (c.getChannelId() == getQueryBot().getTs3Api().getChannelsByName("AFK").get(0).getId())
+                                    return;
+                                getQueryBot().getTs3Api().moveClient(c.getId(), afk.getId());
+                            }
+                            try {
+                                getQueryBot().getTs3Api().pokeClient(c.getId(), getPokeMessage().replace("%channel%", Objects.isNull(afk) ? defaultChannel.getName() : afk.getName()));
+                            } catch (Exception ex) {
+                                System.err.println(ex.getMessage());
+                            }
                         });
             }
         }, 0, 10000);
@@ -64,16 +78,33 @@ public class AFKBotModule extends Module {
     @Override
     public void resetVariables() {
         pokeMessage = null;
+        idletime = -991231231141241L;
+    }
+
+    private long getIdleTime() {
+        if (idletime != -991231231141241L) return idletime;
+        try {
+            ResultSet rs = QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeQuery(
+                    "SELECT afk_idle_time FROM query_bot_entity WHERE uuid='" + getQueryBot().getUuid() + "'"
+            );
+            rs.next();
+            idletime = TimeUnit.SECONDS.toMillis(rs.getInt("afk_idle_time"));
+            return TimeUnit.SECONDS.toMillis(rs.getInt("afk_idle_time"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        idletime = TimeUnit.MINUTES.toMillis(5);
+        return TimeUnit.MINUTES.toMillis(5);
     }
 
     private String getPokeMessage() {
-        if(Objects.nonNull(pokeMessage)) return pokeMessage;
+        if (Objects.nonNull(pokeMessage)) return pokeMessage;
         try {
             ResultSet rs = QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeQuery(
-                    "SELECT message FROM afk_poke_entity WHERE id='" + getQueryBot().getUuid() + "'"
+                    "SELECT afkmessage FROM query_bot_entity WHERE uuid='" + getQueryBot().getUuid() + "'"
             );
             rs.next();
-            pokeMessage = rs.getString("message");
+            pokeMessage = rs.getString("afkmessage");
         } catch (SQLException e) {
             e.printStackTrace();
             System.err.println("Switching to emergency wrong text!");

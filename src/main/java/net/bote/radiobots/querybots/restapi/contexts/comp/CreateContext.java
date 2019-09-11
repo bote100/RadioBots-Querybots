@@ -37,17 +37,18 @@ public class CreateContext extends RestAPIContext {
 
         try {
             QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeUpdate(
-                    "INSERT INTO query_bot_entity (apikey, modules, query_password, query_user, server, nickname) VALUES " +
+                    "INSERT INTO query_bot_entity (apikey, modules, query_password, query_user, server, nickname, welcomemessage, afkmessage, afk_idle_time) VALUES " +
                             "('" + getHeaderVal(hex, "apikey") + "', '[\"welcome\"]', '" + Base64.getEncoder()
                             .encodeToString(getHeaderVal(hex, "querypw").getBytes()) + "'," +
-                            "'" + getHeaderVal(hex, "queryuser") + "', '" + getHeaderVal(hex, "server") + "', '" + getHeaderVal(hex, "nickname") + "')"
+                            "'" + getHeaderVal(hex, "queryuser") + "', '" + getHeaderVal(hex, "server") + "'," +
+                            "'" + getHeaderVal(hex, "nickname") + "', 'Willkommen auf diesem TeamSpeak!'," +
+                            "'Willkommen! Es ist derzeit %time% Uhr!', '300')"
             );
 
             ResultSet set = query("SELECT uuid FROM query_bot_entity ORDER BY uuid DESC LIMIT 1");
             botid = set.getInt("uuid");
 
             update("INSERT INTO afk_poke_entity (id, message) VALUES ('"+botid+"', 'Du wurdest in den AFK Channel, aufgrund zu langer Inaktivität, verschoben!')");
-            update("INSERT INTO welcome_message_entity (id, message) VALUES ('"+botid+"', 'Willkommen auf diesem TeamSpeak!')");
             update("INSERT INTO support_bot_entity (id, message, tsgroup) " +
                     "VALUES ('"+botid+"', 'Ein Nutzer wartet im Support!', '1')");
 

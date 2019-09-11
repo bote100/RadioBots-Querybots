@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 @Getter
 public class QBManager {
 
+    @Getter
     private static HashMap<Integer, QueryBot> onlineBots = Maps.newHashMap();
 
     public static QueryBot getQueryBot(int uid) throws SQLException {

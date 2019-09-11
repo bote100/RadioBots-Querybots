@@ -7,6 +7,8 @@ import net.bote.radiobots.querybots.modules.Module;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.util.GregorianCalendar;
 import java.util.Objects;
 
 
@@ -47,10 +49,10 @@ public class WelcomeMessageModule extends Module {
         if(Objects.nonNull(welcomeMessage)) return welcomeMessage;
         try {
             ResultSet rs = QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeQuery(
-                    "SELECT message FROM welcome_message_entity WHERE id='" + getQueryBot().getUuid() + "'"
+                    "SELECT welcomemessage FROM query_bot_entity WHERE uuid='" + getQueryBot().getUuid() + "'"
             );
             rs.next();
-            welcomeMessage = rs.getString("message");
+            welcomeMessage = rs.getString("welcomemessage").replace("%time%", DateFormat.getTimeInstance(DateFormat.SHORT).format(new GregorianCalendar().getTime()));
         } catch (SQLException e) {
             e.printStackTrace();
             System.err.println("Switching to emergency wrong text!");
