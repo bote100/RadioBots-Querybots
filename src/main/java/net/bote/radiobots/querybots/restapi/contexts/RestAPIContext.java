@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -32,7 +31,7 @@ public abstract class RestAPIContext implements HttpHandler {
 
     public boolean checkParams(HttpExchange exchange) {
 
-        if(!isHeaderSet("apikey", exchange)) {
+        if (!isHeaderSet("apikey", exchange)) {
             sendResponse(new JSONObject()
                             .put("success", false)
                             .put("data", "Missing API key!").toString()
@@ -57,8 +56,8 @@ public abstract class RestAPIContext implements HttpHandler {
             httpExchange.sendResponseHeaders(200, 0);
             try (BufferedOutputStream out = new BufferedOutputStream(httpExchange.getResponseBody())) {
                 try (ByteArrayInputStream bis = new ByteArrayInputStream(response.getBytes())) {
-                    byte [] buffer = response.getBytes();
-                    int count ;
+                    byte[] buffer = response.getBytes();
+                    int count;
                     while ((count = bis.read(buffer)) != -1) out.write(buffer, 0, count);
                 }
             }
@@ -76,19 +75,22 @@ public abstract class RestAPIContext implements HttpHandler {
     }
 
     public boolean checkAccess(HttpExchange exchange, int botid) {
-        try {
-            return QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeQuery(
-                    "SELECT uuid FROM query_bot_entity WHERE apikey='"+getParams(exchange).getOrDefault("apikey", "")+"'" +
-                            "AND uuid='" + botid + "'"
-            ).next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+
+        return getParams(exchange).getOrDefault("apikey", "").equals(QueryBotApplication.getInstance().getConfig().getString("masterPassword"));
+
+//        try {
+//            return QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeQuery(
+//                    "SELECT uuid FROM query_bot_entity WHERE apikey='"+getParams(exchange).getOrDefault("apikey", "")+"'" +
+//                            "AND uuid='" + botid + "'"
+//            ).next();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//      return false;
     }
 
     public HashMap<String, String> getParams(HttpExchange httpExchange) {
-        if(savedParams.containsKey(httpExchange)) return savedParams.get(httpExchange);
+        if (savedParams.containsKey(httpExchange)) return savedParams.get(httpExchange);
         HashMap<String, String> map = Maps.newHashMap();
 
         JSONObject jsonObject = new JSONObject(httpExchange.getRequestHeaders().get("data").get(0));
