@@ -37,8 +37,8 @@ public class CreateContext extends RestAPIContext {
 
         try {
             QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeUpdate(
-                    "INSERT INTO query_bot_entity (apikey, modules, query_password, query_user, server, nickname, welcomemessage, afkmessage, afk_idle_time) VALUES " +
-                            "('" + getHeaderVal(hex, "apikey") + "', '[\"welcome\"]', '" + Base64.getEncoder()
+                    "INSERT INTO query_bot_entity (modules, query_password, query_user, server, nickname, welcomemessage, afkmessage, afk_idle_time) VALUES " +
+                            "('[\"welcome\"]', '" + Base64.getEncoder()
                             .encodeToString(getHeaderVal(hex, "querypw").getBytes()) + "'," +
                             "'" + getHeaderVal(hex, "queryuser") + "', '" + getHeaderVal(hex, "server") + "'," +
                             "'" + getHeaderVal(hex, "nickname") + "', 'Willkommen auf diesem TeamSpeak!'," +
