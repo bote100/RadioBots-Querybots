@@ -67,7 +67,7 @@ public class SupportBotModule extends Module {
         try {
 
             ResultSet resultSet = QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeQuery(
-                    "SELECT message_user, message, tsgroup FROM support_bot_entity WHERE id='" + getQueryBot().getUuid() + "'"
+                    "SELECT message_user, message, tsgroup FROM query_bot_support_bot_entity WHERE id='" + getQueryBot().getUuid() + "'"
             );
             resultSet.next();
 

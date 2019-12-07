@@ -12,8 +12,6 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Elias Arndt | bote100
@@ -40,7 +38,7 @@ public class QueryBotApplication {
                     "jdbc:mysql://" + config.getString("mysqlHost") + ":3306/" + config.getString("mysqlDatabase") +
                             "?autoReconnect=true&serverTimezone=UTC", config.getString("mysqlUser"), config.getString("mysqlPassword")
             );
-            System.out.println("[DEBUG] The password has " + config.getString("mysqlPassword").toCharArray().length + " characters.");
+            //System.out.println("[DEBUG] The password has " + config.getString("mysqlPassword").toCharArray().length + " characters.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -84,22 +82,22 @@ public class QueryBotApplication {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             String line;
             while ((line = reader.readLine()) != null) {
-                System.out.println("fjakdf");
                 if (line.length() == 0) return;
 
                 if (line.equalsIgnoreCase("stop")) {
                     System.exit(0);
-                } else if (line.equalsIgnoreCase("stats")) {
-                    AtomicInteger allBots = new AtomicInteger(0);
-                    QBManager.getAllBots(queryBot -> allBots.addAndGet(1));
-                    System.out.println("Currently are " + allBots.get() + " QueryBots active.");
-
-                    if (QBManager.getOnlineBots().size() == 0) return;
-
-                    System.out.println("Ping random QueryBot...");
-                    QueryBot queryBot = QBManager.getOnlineBots().get(ThreadLocalRandom.current().nextInt(QBManager.getOnlineBots().size()));
-                    queryBot.ping(pingInt -> System.out.println("QueryBots #" + queryBot.getNickname() + " connected to " + queryBot.getDocument().getString("host") + " took " + pingInt + "ms."));
                 }
+//                else if (line.equalsIgnoreCase("stats")) {
+//                    AtomicInteger allBots = new AtomicInteger(0);
+//                    QBManager.getAllBots(queryBot -> allBots.addAndGet(1));
+//                    System.out.println("Currently are " + allBots.get() + " QueryBots active.");
+//
+//                    if (QBManager.getOnlineBots().size() == 0) return;
+//
+//                    System.out.println("Ping random QueryBot...");
+//                    QueryBot queryBot = QBManager.getOnlineBots().get(ThreadLocalRandom.current().nextInt(QBManager.getOnlineBots().size()));
+//                    queryBot.ping(pingInt -> System.out.println("QueryBots #" + queryBot.getNickname() + " connected to " + queryBot.getDocument().getString("host") + " took " + pingInt + "ms."));
+//                }
 
             }
         } catch (Exception ex) {

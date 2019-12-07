@@ -48,7 +48,7 @@ public class BadNicknamesModule extends Module {
     private boolean isBadNick(String nickname) {
         try {
             return QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeQuery(
-                    "SELECT * FROM badnicks WHERE id='" + getQueryBot().getUuid() + "' AND LOWER(nick) LIKE '" + nickname.toLowerCase() + "'"
+                    "SELECT * FROM query_bot_badnicks WHERE id='" + getQueryBot().getUuid() + "' AND LOWER(nick) LIKE '" + nickname.toLowerCase() + "'"
             ).next();
         } catch (SQLException e) {
             e.printStackTrace();
