@@ -28,9 +28,9 @@ public class QBManager {
                 "SELECT * FROM query_bot_entity WHERE uuid='" + uid + "'"
         );
 
+        resultSet.next();
         if(resultSet.getRow() <= 0) return null;
 
-        resultSet.next();
         Document doc = new Document()
                 .append("host", resultSet.getString("server"))
                 .append("user", resultSet.getString("query_user"))

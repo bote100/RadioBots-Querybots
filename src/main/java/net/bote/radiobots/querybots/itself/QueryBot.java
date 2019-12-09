@@ -112,7 +112,6 @@ public class QueryBot {
         if(!Objects.isNull(activeModules)) return activeModules;
         JSONArray array = new JSONArray(this.getDocument().getString("modules"));
         List<Module> list = new ArrayList<>();
-        System.out.println(array.toString());
         for(int i = 0; i < array.length(); i++)
             for(Module current : moduleList)
                 if(current.getUniqueName().equals(array.getString(i))) {
