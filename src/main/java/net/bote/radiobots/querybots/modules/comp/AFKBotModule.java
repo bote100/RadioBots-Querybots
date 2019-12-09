@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author Elias Arndt | bote100
- * Created on 27.07.2019
+ * Created on 27.07.2019gamecloud_invoices
  */
 
 public class AFKBotModule extends Module {
