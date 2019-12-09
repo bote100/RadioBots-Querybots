@@ -25,9 +25,7 @@ public class DevContext extends RestAPIContext {
 
     @Override
     public void handle(HttpExchange httpExchange) {
-
-        if(!checkParams(httpExchange)) return;
-
-        sendResponse( checkAccess(httpExchange, 1) + "", httpExchange);
+        sendResponse("This context is for development use only!", httpExchange);
+        return;
     }
 }

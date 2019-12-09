@@ -65,7 +65,7 @@ public class QueryBot {
             ts3Api.setNickname(document.getString("name"));
             this.nickname = document.getString("name");
         } catch (TS3CommandFailedException ex) {
-            ex.printStackTrace();
+            System.err.println("Issue while launching (#"+uid+") => " + ex.getMessage() + " [Ignoring...]");
             this.nickname = "RadioBotsEU Querybot #" + ThreadLocalRandom.current().nextInt(999);
             setNickname(this.nickname);
         }

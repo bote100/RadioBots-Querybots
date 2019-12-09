@@ -6,7 +6,7 @@
 
     <groupId>net.bote</groupId>
     <artifactId>rbquerybots</artifactId>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>1.2.2-PRODUCTION</version>
     <build>
         <plugins>
             <plugin>
