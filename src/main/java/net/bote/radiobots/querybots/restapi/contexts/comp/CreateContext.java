@@ -49,8 +49,8 @@ public class CreateContext extends RestAPIContext {
             botid = set.getInt("uuid");
 
             //update("INSERT INTO afk_poke_entity (id, message) VALUES ('"+botid+"', 'Du wurdest in den AFK Channel, aufgrund zu langer Inaktivität, verschoben!')");
-            update("INSERT INTO query_bot_support_bot_entity (id, message, tsgroup) " +
-                    "VALUES ('"+botid+"', 'Ein Nutzer wartet im Support!', '1')");
+            update("INSERT INTO query_bot_support_bot_entity (id, message_user, message, tsgroup) " +
+                    "VALUES ('"+botid+"', 'Wir werden uns schnellstmöglichst um dich kümmern!', 'Ein Nutzer wartet im Support!', '1')");
 
         } catch (SQLException e) {
             e.printStackTrace();

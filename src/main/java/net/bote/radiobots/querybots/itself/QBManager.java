@@ -27,6 +27,9 @@ public class QBManager {
         ResultSet resultSet = QueryBotApplication.getInstance().getMysqlConnection().createStatement().executeQuery(
                 "SELECT * FROM query_bot_entity WHERE uuid='" + uid + "'"
         );
+
+        if(resultSet.getRow() <= 0) return null;
+
         resultSet.next();
         Document doc = new Document()
                 .append("host", resultSet.getString("server"))

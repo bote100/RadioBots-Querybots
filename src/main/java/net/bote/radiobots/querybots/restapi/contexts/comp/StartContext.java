@@ -56,6 +56,12 @@ public class StartContext extends RestAPIContext {
                 return;
             }
             queryBot = QBManager.getQueryBot(Integer.parseInt(stringID));
+
+            if(Objects.isNull(queryBot)) {
+                sendResponse(new JSONObject().put("success", false).put("data", "This bot does not exists!").toString(), httpExchange);
+                return;
+            }
+
         } catch (Exception e) {
 
             if(Objects.isNull(e.getMessage())) e.printStackTrace();

@@ -30,15 +30,30 @@ public class WebServerService {
 
         System.out.println("Started " + this.getClass().getSimpleName() + " on " + this.httpServer.getAddress().getHostString() + ":" + this.httpServer.getAddress().getPort());
 
-        PackageUtils.performForClasses(RestAPIContext.class, clazz -> {
-            try {
-                RestAPIContext context = clazz.newInstance();
-                this.httpServer.createContext("/" + context.getURLDirectory(), context);
-                System.out.println("Initalized context <=> /" + context.getURLDirectory());
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }, "net.bote.radiobots.querybots.restapi.contexts.comp");
+        System.out.println("Loading restful contexts...");
+        System.out.print("[");
+
+        try {
+            Thread.sleep(500);
+
+            PackageUtils.performForClasses(RestAPIContext.class, clazz -> {
+                try {
+                    RestAPIContext context = clazz.newInstance();
+                    this.httpServer.createContext("/" + context.getURLDirectory(), context);
+                    System.out.print("##");
+                    Thread.sleep(125);
+                } catch (InstantiationException | IllegalAccessException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }, "net.bote.radiobots.querybots.restapi.contexts.comp");
+
+            System.out.print("]");
+            System.out.println(" Loaded all contexts!");
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }

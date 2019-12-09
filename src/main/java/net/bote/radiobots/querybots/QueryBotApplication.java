@@ -8,10 +8,14 @@ import net.bote.radiobots.querybots.util.Document;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.concurrent.Executors;
 
 /**
  * @author Elias Arndt | bote100
@@ -56,7 +60,18 @@ public class QueryBotApplication {
             System.out.println("Have a good day!");
         }));
 
+        keepDatabaseAlive();
+
         System.out.println("Started successfully RadioBotsEU QueryBot System!");
+
+        final Properties properties = new Properties();
+        try {
+            properties.load(getInstance().getClass().getClassLoader().getResourceAsStream("app.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Running RadioBotsEU QueryBots Software by bote100 | Elias on " + properties.getProperty("version") + " !");
+        System.out.println("Now waiting for incoming signals...");
         listen();
     }
 
@@ -75,6 +90,25 @@ public class QueryBotApplication {
             this.config = document;
         }
         this.config = new Document().loadToExistingDocument(file);
+    }
+
+    private void keepDatabaseAlive() {
+        Executors.newCachedThreadPool().execute(() -> {
+            while(true) {
+                if(Objects.nonNull(mysqlConnection)) {
+                    try {
+                        mysqlConnection.createStatement().executeQuery("SELECT * FROM query_bot_entity LIMIT 1");
+                        System.out.println("Send query to database to keep connection alive");
+                    } catch (SQLException e) { e.printStackTrace(); }
+                } else break;
+                // Query every hour
+                try {
+                    Thread.sleep(1000*60*60);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private static void listen() {
