@@ -1,4 +1,4 @@
-# RadioBotsEU QueryBots
+# RadioBotsEU QueryBots - Inaktiv
 
 Dies ist die allgemeine Dokumentation zur Nutzung der RESTful-API
 
